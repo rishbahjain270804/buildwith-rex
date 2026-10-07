@@ -111,3 +111,4 @@ footer { border-top: 2px dashed var(--rule); padding-top: 18px; display: grid; g
 .page > *, section > *, .card > *, .code, .rule-list li > *, .map li > * { min-width: 0; }
 body { overflow-x: hidden; }
 .rule-list li span, .map li span, dd { overflow-wrap: anywhere; }
+.page, section, .card, header, footer { grid-template-columns: minmax(0, 1fr); }
