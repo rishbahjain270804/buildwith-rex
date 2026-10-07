@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="hi-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scaling Kit</title>
+<meta name="description" content="Vertical vs horizontal scaling: kab kaunsa, galat choice pe paisa kaise jalta hai, interview answer, aur 25 minute ka load balancer task.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Permanent+Marker&family=Special+Elite&family=JetBrains+Mono&display=swap">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main class="page">
+  <header>
+    <p class="kicker">@buildwith.rex · kit · SCALE</p>
+    <h1>Bada server ya aur servers?</h1>
+    <p class="lead">Vertical vs horizontal scaling: kab kaunsa chahiye, aur galat choice pe paisa kaise jalta hai. Interview answer sabse pehle, phir samjhaata hoon.</p>
+  </header>
+
+  <section>
+    <h2>Interview mein ye bolo</h2>
+    <div class="card">
+      <ol class="rule-list">
+        <li><span>App servers <mark>stateless</mark> rakho aur load balancer ke peeche <mark>scale out</mark> karo.</span></li>
+        <li><span>Database ko jab tak ho sake <mark>scale up</mark> karo, kyunki database ko todna mushkil hai.</span></li>
+        <li><span>Reads zyada hon toh <mark>read replica</mark> jodo. Writes phir bhi ek primary pe jaate hain.</span></li>
+        <li><span><mark>Sharding</mark> sabse aakhir mein, jab writes ya data sabse badi machine se bhi bada ho jaaye.</span></li>
+        <li><span>Size <mark>naap ke</mark> chuno, andaaze se nahi. Asli usage dekho, phir machine chuno.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section>
+    <h2>Photocopy dukaan se samjho</h2>
+    <div class="card">
+      <ul class="map">
+        <li><span>Ek photocopy machine</span><span class="eq">=</span><span class="tech">server</span></li>
+        <li><span>Purani machine ki jagah tez machine</span><span class="eq">=</span><span class="tech">vertical / scale up</span></li>
+        <li><span>Teen machines rakh lo</span><span class="eq">=</span><span class="tech">horizontal / scale out</span></li>
+        <li><span>Counter wala jo print khaali machine ko bheje</span><span class="eq">=</span><span class="tech">load balancer</span></li>
+        <li><span>PDF sirf machine 1 ke desktop pe</span><span class="eq">=</span><span class="tech">local state</span></li>
+        <li><span>Dukaan ki shared drive</span><span class="eq">=</span><span class="tech">shared store</span></li>
+        <li><span>Akeli machine atki, dukaan band</span><span class="eq">=</span><span class="tech">single point of failure</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Paisa kahan jalta hai</h2>
+    <p>Cloud pe machine ka size double karo toh kiraaya bhi double hota hai. Matlab har CPU ka rate aksar wahi rehta hai. Badi machine mehngi nahi hai. <mark>Paisa wahan jalta hai jahan capacity khaali padi hai.</mark></p>
+    <div class="card wrap-table">
+      <table>
+        <thead><tr><th>Machine (AWS m7i)</th><th>vCPU / RAM</th><th>USD / ghanta</th></tr></thead>
+        <tbody>
+          <tr><td>large</td><td>2 / 8 GB</td><td>0.106</td></tr>
+          <tr><td>xlarge</td><td>4 / 16 GB</td><td>0.212</td></tr>
+          <tr><td>2xlarge</td><td>8 / 32 GB</td><td>0.424</td></tr>
+          <tr><td>4xlarge</td><td>16 / 64 GB</td><td>0.848</td></tr>
+          <tr><td>48xlarge (sabse badi)</td><td>192 / 768 GB</td><td>10.18</td></tr>
+        </tbody>
+      </table>
+      <p class="src">AWS EC2 on-demand, Linux, Mumbai (ap-south-1), AWS pricing feed, 7 Oct 2026. Har row pe lagbhag $0.053 per vCPU per ghanta.</p>
+    </div>
+    <dl>
+      <div><dt>Galti 1: badi machine, khaali raat</dt><dd>16 vCPU wali machine 24x7 lagbhag $619 mahina. Agar raat ko 10-20% hi use ho rahi hai, toh zyada paisa khaali cores ka ja raha hai. Autoscaling se chhoti machines traffic ke saath badhti-ghatti hain.</dd></div>
+      <div><dt>Galti 2: chhote app pe poori fleet</dt><dd>Ek m7i.large lagbhag $77 mahina. Teen machines plus load balancer lagbhag $250 se upar. Agar ek machine kaafi thi, toh bill teen guna aur sambhaalne ko zyada cheezein.</dd></div>
+    </dl>
+    <p class="src">Load balancer ka rate AWS ke US-East page se liya hai ($0.0225/ghanta + LCU); Mumbai ka rate thoda alag ho sakta hai.</p>
+  </section>
+
+  <section>
+    <h2>25 minute ka task: session kahan rakhoge?</h2>
+    <p>Do chhote server, ek load balancer. Pehle login RAM mein rakhenge aur dekhenge kya toot-ta hai. Phir shared store mein rakh ke theek karenge. Sirf Python chahiye, koi library nahi (Locust optional).</p>
+    <div class="card">
+      <ol class="steps">
+        <li>Teeno files ek folder mein save karo.</li>
+        <li>Teen terminal kholo aur chalao: <code>python app.py 8001</code>, <code>python app.py 8002</code>, <code>python lb.py</code></li>
+        <li>Browser mein kholo: <code>127.0.0.1:8000/login?user=riya</code>. Jo token mile, usse <code>127.0.0.1:8000/me?token=TOKEN</code> kholo aur 5-6 baar refresh karo.</li>
+        <li>Dono app servers band karo aur <code>shared</code> ke saath dobara chalao: <code>python app.py 8001 shared</code>, <code>python app.py 8002 shared</code>. Step 3 dobara karo.</li>
+        <li>Optional: <code>pip install locust</code>, phir <code>locust -f locustfile.py --headless -u 10 -r 2 -t 30s -H http://127.0.0.1:8000</code> aur failures dekho.</li>
+      </ol>
+      <p><span class="ok">Kaam kiya toh:</span> RAM mode mein har doosra refresh <code>kaun? login karo</code> dikhayega, kyunki login doosre server ki RAM mein tha. Shared mode mein har refresh <code>hello riya</code>, bas server number badalta rahega. Yahi stateless server hai.</p>
+    </div>
+    <div class="code">
+      <span class="name">app.py</span>
+      <button class="copy" type="button" data-target="f1">copy</button>
+<pre><code id="f1">import sys, uuid, sqlite3
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+from urllib.parse import urlparse, parse_qs
+
+PORT = int(sys.argv[1])
+SHARED = len(sys.argv) &gt; 2 and sys.argv[2] == "shared"
+memory = {}  # token -&gt; user. Sirf isi process ki RAM mein.
+
+def db():
+    c = sqlite3.connect("sessions.db", timeout=5)
+    c.execute("CREATE TABLE IF NOT EXISTS s (token TEXT PRIMARY KEY, user TEXT)")
+    return c
+
+def save(token, user):
+    if SHARED:
+        c = db(); c.execute("INSERT INTO s VALUES (?, ?)", (token, user)); c.commit(); c.close()
+    else:
+        memory[token] = user
+
+def load(token):
+    if SHARED:
+        c = db(); row = c.execute("SELECT user FROM s WHERE token = ?", (token,)).fetchone(); c.close()
+        return row[0] if row else None
+    return memory.get(token)
+
+class H(BaseHTTPRequestHandler):
+    def do_GET(self):
+        url = urlparse(self.path)
+        q = parse_qs(url.query)
+        if url.path == "/login":
+            token = uuid.uuid4().hex[:8]
+            save(token, q.get("user", ["guest"])[0])
+            self.reply(200, f"token={token}")
+        elif url.path == "/me":
+            user = load(q.get("token", [""])[0])
+            if user:
+                self.reply(200, f"hello {user}")
+            else:
+                self.reply(401, "kaun? login karo")
+        else:
+            self.reply(404, "nahi mila")
+
+    def reply(self, code, text):
+        body = f"{text}  (server {PORT})\n".encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "text/plain")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *args):
+        pass
+
+if SHARED:
+    db().close()  # table pehle se bana lo
+print(f"server {PORT} chalu, store = {'sqlite (shared)' if SHARED else 'RAM'}")
+ThreadingHTTPServer(("127.0.0.1", PORT), H).serve_forever()</code></pre>
+    </div>
+    <div class="code">
+      <span class="name">lb.py</span>
+      <button class="copy" type="button" data-target="f2">copy</button>
+<pre><code id="f2">import itertools, http.client
+from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
+
+BACKENDS = itertools.cycle([("127.0.0.1", 8001), ("127.0.0.1", 8002)])
+
+class LB(BaseHTTPRequestHandler):
+    def do_GET(self):
+        if self.path == "/favicon.ico":       # browser ki extra request, round-robin na bigde
+            self.send_response(404); self.send_header("Content-Length", "0"); self.end_headers()
+            return
+        host, port = next(BACKENDS)
+        try:
+            conn = http.client.HTTPConnection(host, port, timeout=5)
+            conn.request("GET", self.path)
+            r = conn.getresponse()
+            code, body = r.status, r.read()
+            conn.close()
+        except OSError:
+            code, body = 502, f"server {port} band hai\n".encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "text/plain")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *args):
+        pass
+
+print("load balancer: http://127.0.0.1:8000")
+ThreadingHTTPServer(("127.0.0.1", 8000), LB).serve_forever()</code></pre>
+    </div>
+    <div class="code">
+      <span class="name">locustfile.py (optional)</span>
+      <button class="copy" type="button" data-target="f3">copy</button>
+<pre><code id="f3">from locust import HttpUser, task, between
+
+class Student(HttpUser):
+    wait_time = between(0.5, 1)
+
+    def on_start(self):
+        r = self.client.get("/login?user=riya")
+        self.token = r.text.split()[0].split("=")[1]   # "token=ab12cd34  (server 8001)"
+
+    @task
+    def me(self):
+        self.client.get(f"/me?token={self.token}", name="/me")</code></pre>
+    </div>
+    <p class="src">Simplified: yahan sqlite shared store hai; asli systems mein Redis ya database hota hai. Laptop pe load test asli speed nahi naapta.</p>
+  </section>
+
+  <section>
+    <h2>Ek screen ki cheat sheet</h2>
+    <dl>
+      <div><dt>Vertical (scale up)</dt><dd>Wahi app, badi machine. Code same, par upgrade pe thoda downtime, aur sabse badi machine ke baad aage raasta nahi.</dd></div>
+      <div><dt>Horizontal (scale out)</dt><dd>Zyada machines, load balancer ke peeche. Tabhi chalega jab koi bhi server koi bhi request sambhal sake.</dd></div>
+      <div><dt>Load balancer</dt><dd>Har request kisi free server ko bhejta hai. Akela ho toh khud single point of failure ban jaata hai.</dd></div>
+      <div><dt>Stateless</dt><dd>Server apni RAM ya disk mein user ki koi baat nahi rakhta. Session, uploads aur cache bahar rehte hain.</dd></div>
+      <div><dt>Shared store</dt><dd>Sessions ke liye Redis ya database, files ke liye object storage (S3 jaisa).</dd></div>
+      <div><dt>Read replica</dt><dd>Database ki read-only copy. Reads baant deta hai, writes phir bhi ek primary pe.</dd></div>
+      <div><dt>Sharding</dt><dd>Data tukdon mein, har tukda alag database pe. Writes scale hote hain, par joins aur rebalancing mushkil. Isliye sabse aakhir mein.</dd></div>
+      <div><dt>Autoscaling</dt><dd>Traffic dekh ke servers khud badhte-ghatte hain, toh peak ka paisa sirf peak ke time lagta hai.</dd></div>
+    </dl>
+  </section>
+
+  <section>
+    <h2>Aage padho (sab free)</h2>
+    <ul class="links">
+      <li><span class="tag">padho</span><a href="https://learn.microsoft.com/en-us/azure/architecture/guide/design-principles/scale-out" rel="noopener">Microsoft: Design to scale out</a><span class="d">Seedhe shabdon mein: session RAM mein mat rakho, koi bhi instance koi bhi request sambhale.</span></li>
+      <li><span class="tag">khelo</span><a href="https://docs.locust.io/en/stable/quickstart.html" rel="noopener">Locust quickstart</a><span class="d">Free load testing tool. Upar wale task ka step 5.</span></li>
+      <li><span class="tag">case study</span><a href="https://nickcraver.com/blog/2016/02/17/stack-overflow-the-architecture-2016-edition/" rel="noopener">Stack Overflow ka architecture (2016)</a><span class="d">Web servers scale out, database scale up. Asli example, 2016 ke numbers.</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Ye kit @buildwith.rex ne banaya hai. Har reel ke saath aisa ek kit aata hai. <a href="../">Saare kits</a></p>
+    <a class="follow" href="https://www.instagram.com/buildwith.rex/" rel="noopener">Follow @buildwith.rex</a>
+  </footer>
+</main>
+<script src="../copy.js"></script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="hi-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>System Design Kit</title>
+<meta name="description" content="System design ek tapri se: server, scaling, load balancer, cache, database. Cheat sheet, 20-minute cache task, free links.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Permanent+Marker&family=Special+Elite&family=JetBrains+Mono&display=swap">
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<main class="page">
+  <header>
+    <p class="kicker">@buildwith.rex · kit · DESIGN</p>
+    <h1>System design, chai ki tapri se samjho</h1>
+    <p class="lead">Reel mein 48 second the. Yahan wahi baat aaram se, plus ek 20 minute ka task jo tum aaj raat kar sakte ho.</p>
+  </header>
+
+  <section>
+    <h2>Tapri pe kya hai, tech mein kya hai</h2>
+    <div class="card">
+      <ul class="map">
+        <li><span>Ek chaiwala, ek stove</span><span class="eq">=</span><span class="tech">server</span></li>
+        <li><span>Aur chaiwale laga do</span><span class="eq">=</span><span class="tech">horizontal scaling</span></li>
+        <li><span>Counter pe banda jo order baantta hai</span><span class="eq">=</span><span class="tech">load balancer</span></li>
+        <li><span>Thermos mein pehle se bani chai</span><span class="eq">=</span><span class="tech">cache</span></li>
+        <li><span>Hisaab ki asli copy</span><span class="eq">=</span><span class="tech">database</span></li>
+        <li><span>"Abhi nahi ho payega"</span><span class="eq">=</span><span class="tech">503</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Chhe shabd jo ab tumhe aate hain</h2>
+    <dl>
+      <div><dt>Server</dt><dd>Wo computer jo tumhari website ki har request handle karta hai. Chhote project ke liye ek hi kaafi hai.</dd></div>
+      <div><dt>Scaling</dt><dd>Load badhe toh capacity badhao. Horizontal matlab aur machines, vertical matlab ek machine ko bada karna. Pehle vertical karte hain, kyunki wo sasta aur simple hai.</dd></div>
+      <div><dt>Load balancer</dt><dd>Request aati hai, ye dekhta hai kaun sa server khaali hai, aur wahan bhej deta hai. Sabse simple tareeka round robin hai: baari baari.</dd></div>
+      <div><dt>Cache</dt><dd>Jo cheez baar baar maangi jaati hai, uska jawab paas rakh lo. Fast hai, par purana ho sakta hai, isliye expiry (TTL) rakhte hain.</dd></div>
+      <div><dt>Database</dt><dd>Data ki asli jagah. Server crash ho jaaye, data yahin safe rehta hai, isliye server aur database alag rakhte hain.</dd></div>
+      <div><dt>503</dt><dd>Server ka "service unavailable". Zyadatar iska matlab hai ki load zyada hai ya peeche kuch gir gaya.</dd></div>
+    </dl>
+  </section>
+
+  <section>
+    <h2>20 minute ka task: apna pehla cache banao</h2>
+    <div class="card">
+      <ol class="steps">
+        <li>Ye code <code>cache_demo.py</code> naam se save karo aur run karo.</li>
+        <li>Dekho kitne second lage.</li>
+        <li>Ab loop mein <code>fast_square</code> ki jagah <code>slow_square</code> likho aur dobara run karo.</li>
+      </ol>
+      <div class="code">
+        <span class="name">cache_demo.py</span>
+        <button class="copy" type="button" data-target="c1">copy</button>
+<pre><code id="c1">import time
+
+def slow_square(n):
+    time.sleep(2)          # maan lo ye ek slow database call hai
+    return n * n
+
+cache = {}
+
+def fast_square(n):
+    if n in cache:
+        return cache[n]    # pehle se taiyaar jawab
+    cache[n] = slow_square(n)
+    return cache[n]
+
+start = time.perf_counter()
+for _ in range(3):
+    fast_square(7)
+print(round(time.perf_counter() - start, 1), "seconds")</code></pre>
+      </div>
+      <p><span class="ok">Kaam kiya toh:</span> <code>fast_square</code> wala run lagbhag 2.0 seconds dikhayega aur <code>slow_square</code> wala lagbhag 6.0. Wo 4 second ka farak hi cache hai.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Aage kya padhein (sab free)</h2>
+    <ul class="links">
+      <li><span class="tag">roadmap</span><a href="https://roadmap.sh/system-design" rel="noopener">roadmap.sh/system-design</a><span class="d">Kis order mein kya seekhna hai. Bookmark karo, ek ek karke tick karo.</span></li>
+      <li><span class="tag">padho</span><a href="https://github.com/donnemartin/system-design-primer" rel="noopener">System Design Primer (GitHub)</a><span class="d">Sabse famous free system design repo. README se shuru karo.</span></li>
+      <li><span class="tag">dekho</span><a href="https://www.youtube.com/@ByteByteGo" rel="noopener">ByteByteGo on YouTube</a><span class="d">Chhote animated videos, English mein.</span></li>
+    </ul>
+  </section>
+
+  <footer>
+    <p>Ye kit @buildwith.rex ne banaya hai. Har reel ke saath aisa ek kit aata hai. <a href="../">Saare kits</a></p>
+    <a class="follow" href="https://www.instagram.com/buildwith.rex/" rel="noopener">Follow @buildwith.rex</a>
+  </footer>
+</main>
+<script src="../copy.js"></script>
+</body>
+</html>
