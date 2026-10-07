@@ -139,3 +139,5 @@ body { overflow-x: hidden; }
 .series h3 { margin: 0; font: 22px var(--marker); }
 .series ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
 .soon { font: 13px var(--type); color: var(--amber); border: 1px solid var(--amber); border-radius: 6px; padding: 1px 6px; margin-left: 6px; }
+
+.sitefoot a.follow { color: #fff; text-decoration: none; }
