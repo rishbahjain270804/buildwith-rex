@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="hi-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>UPI Pending Kit</title>
+<meta name="description" content="UPI pe paisa kata par pahuncha nahi? Pending ka matlab, RBI ka T+1 / T+5 rule, kya karna hai, aur do bank ek switch wala Python task.">
+<link rel="canonical" href="https://buildwithrex.me/pending/">
+<meta property="og:title" content="UPI Pending Kit">
+<meta property="og:description" content="UPI pe paisa kata par pahuncha nahi? Pending ka matlab, RBI ka T+1 / T+5 rule, kya karna hai, aur do bank ek switch wala Python task.">
+<meta property="og:url" content="https://buildwithrex.me/pending/">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#f6efe1">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Permanent+Marker&family=Special+Elite&family=JetBrains+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="/style.css?v=4">
+</head>
+<body>
+<header class="topnav"><div class="in">
+  <a class="brand" href="/"><span>&gt;_</span> rex</a>
+  <a class="nl" href="/kits/" aria-current="page">Kits</a>
+  <a class="nl" href="/topics/">Topics</a>
+  <a class="nl" href="/about/">About</a>
+</div></header>
+<main class="page">
+<header>
+  <p class="kicker">@buildwith.rex · kit · PENDING</p>
+  <h1>Paisa kata, par pahuncha nahi</h1>
+  <p class="lead">Pending matlab paisa gaya nahi. Bas jawab nahi aaya. Yahan samjho andar kya hota hai, aur tumhe kya karna hai.</p>
+</header>
+
+<section>
+  <h2>Pending dikhe toh ye karo</h2>
+  <div class="card">
+    <ol class="rule-list">
+      <li><span><mark>Dobara mat bhejo.</mark> Pehla payment baad mein success ho gaya, toh paisa do baar katega.</span></li>
+      <li><span>App mein transaction kholo, UPI ref ya UTR number note karo, aur status dekho.</span></li>
+      <li><span>Ruko. Dost ko bheja ho toh agle din tak, dukaan ko bheja ho toh 5 din tak paisa khud wapas aata hai.</span></li>
+      <li><span>Time nikal gaya? Usi transaction pe app mein complaint karo. 30 din mein hal na ho toh RBI Ombudsman.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <h2>Andar kya hota hai</h2>
+  <p>UPI app paisa nahi bhejta. Paisa bank ke paas rehta hai. App sirf ek message bhejta hai, aur NPCI ka switch wo message tumhare bank se saamne wale bank tak le jaata hai.</p>
+  <div class="card">
+    <ul class="map">
+      <li><span>App (PhonePe, GPay)</span><span class="eq">=</span><span class="tech">sirf screen aur message</span></li>
+      <li><span>Tumhara bank paise kaatta hai</span><span class="eq">=</span><span class="tech">debit, sabse pehle</span></li>
+      <li><span>NPCI switch message aage bhejta hai</span><span class="eq">=</span><span class="tech">routing + hisaab</span></li>
+      <li><span>Saamne wala bank paise jama karta hai</span><span class="eq">=</span><span class="tech">credit</span></li>
+      <li><span>"Mil gaya" wapas aata hai</span><span class="eq">=</span><span class="tech">success</span></li>
+      <li><span>"Mil gaya" time pe nahi aaya</span><span class="eq">=</span><span class="tech">pending / timeout</span></li>
+      <li><span>Switch dobara poochta hai, jama nahi hua tha</span><span class="eq">=</span><span class="tech">reversal</span></li>
+    </ul>
+  </div>
+  <p>Ek line yaad rakho: <mark>Success = debit + credit ka jawab. Pending = debit + jawab nahi.</mark></p>
+</section>
+
+<section>
+  <h2>RBI ka rule</h2>
+  <div class="card wrap-table">
+    <table>
+      <thead><tr><th>Kisko bheja</th><th>Paisa wapas kab tak</th><th>Late hua toh</th></tr></thead>
+      <tbody>
+        <tr><td>Dost ko (person to person)</td><td>Agle din tak (T+1)</td><td>Rs 100 har din</td></tr>
+        <tr><td>Dukaan ko (merchant QR)</td><td>5 din tak (T+5)</td><td>Rs 100 har din</td></tr>
+      </tbody>
+    </table>
+    <p class="src">RBI circular DPSS.CO.PD No.629/02.01.014/2019-20, 20 Sept 2019, lagu 15 Oct 2019. T = jis din paisa kata.</p>
+  </div>
+</section>
+
+<section>
+  <h2>20 minute ka task: do bank, ek switch</h2>
+  <p>Ek chhota simulation jahan bank ka jawab kabhi kabhi kho jaata hai. Tumhara kaam: check-status aur reversal aisa likho ki dono ka total hamesha 500 rahe.</p>
+  <div class="card">
+    <ol class="steps">
+      <li>Code <code>upi.py</code> naam se save karo aur <code>python upi.py</code> chalao. Teen chaar baar chalao.</li>
+      <li>Reversal wali line (<code>payer["bal"] += amt</code>) comment out karke phir chalao.</li>
+      <li>Optional: jab bhi <code>SUCCESS (after check)</code> aaye, socho tumne Pending dekh ke dobara bheja, aur <code>switch_pay</code> ek baar aur call karo.</li>
+    </ol>
+    <p><span class="ok">Kaam kiya toh:</span> reversal ke saath har run ke end mein <code>ledger balanced: 500</code>. Reversal hatao toh ek do run mein <code>ledger leaked!</code>. Wahi gayab 50 rupaye ke liye RBI ka T+1 rule bana hai.</p>
+  </div>
+  <div class="code">
+    <span class="name">upi.py</span>
+    <button class="copy" type="button" data-target="u1">copy</button>
+<pre><code id="u1">import random
+
+payer = {"bal": 500}                       # tumhari tapri (payer bank)
+payee = {"bal": 0, "credited": set()}      # dukaandaar ki tapri (payee bank)
+
+def payee_bank(txn, amt):
+    """Beneficiary bank. Kabhi down, kabhi credit karke bhi jawab kho deta hai."""
+    r = random.random()
+    if r &lt; 0.2:                            # bank down: na credit, na jawab
+        return None
+    payee["bal"] += amt
+    payee["credited"].add(txn)
+    if r &lt; 0.4:                            # credit hua, par jawab raaste mein kho gaya
+        return None
+    return "OK"
+
+def switch_pay(txn, amt):
+    payer["bal"] -= amt                    # 1. pehle debit
+    reply = payee_bank(txn, amt)           # 2. saamne phone lagao
+    if reply == "OK":
+        return "SUCCESS"
+    # timeout. 3. check-status: chadhaya tha ki nahi?
+    if txn in payee["credited"]:
+        return "SUCCESS (after check)"
+    payer["bal"] += amt                    # 4. reversal: paisa wapas
+    return "REVERSED"
+
+for i in range(10):
+    status = switch_pay(f"txn{i}", 50)
+    print(f"txn{i}: {status:22} payer={payer['bal']} payee={payee['bal']}")
+
+assert payer["bal"] + payee["bal"] == 500, "ledger leaked!"
+print("ledger balanced: 500")</code></pre>
+  </div>
+  <p class="src">Simplified: asli UPI mein app aur switch ke beech ek PSP bank hota hai, aur banks ka paisa baad mein net settlement mein milta hai. Par niyam wahi hai: debit hua aur credit nahi, toh reversal hona hi chahiye.</p>
+</section>
+
+<section>
+  <h2>Do sawaal jo sab poochte hain</h2>
+  <dl>
+    <div><dt>Dukaan pe pay kiya, 5 din ho gaye, paisa wapas nahi aaya?</dt><dd>Dobara mat bhejo. App mein us transaction pe Help ya Raise dispute karo aur bank ko UTR number do. Delay pe Rs 100 roz compensation tumhara haq hai. 30 din mein hal na ho toh cms.rbi.org.in pe RBI Ombudsman.</dd></div>
+    <div><dt>App ne Success dikhaya, par dukaandaar bola nahi aaya?</dt><dd>Success tabhi aata hai jab uske bank ne credit confirm kiya. Paisa uske account mein hai, bas uske app ka notification late ho sakta hai. Usse bank balance ya SMS check karne bolo aur UTR dikhao.</dd></div>
+  </dl>
+</section>
+
+<section>
+  <h2>Aage padho (sab free)</h2>
+  <ul class="links">
+    <li><span class="tag">rule</span><a href="https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=11693" rel="noopener">RBI: failed transactions ka TAT circular</a><span class="d">UPI wali rows dekho: T+1, T+5 aur Rs 100 roz.</span></li>
+    <li><span class="tag">samjho</span><a href="https://rbi.org.in/Scripts/PublicationsView.aspx?id=20315" rel="noopener">RBI: Payment Systems booklet</a><span class="d">Lamba hai, UPI wala hissa dhundo.</span></li>
+    <li><span class="tag">flow</span><a href="https://razorpay.com/blog/differences-between-a-payment-service-provider-psp-third-party-upi-app-tpap/" rel="noopener">Razorpay: PSP vs TPAP</a><span class="d">8 step mein poora raasta.</span></li>
+  </ul>
+</section>
+</main>
+<footer class="sitefoot">
+  <p>CS aur tech, dost ki tarah samjhaya. Har hafte ek naya concept, sab free.</p>
+  <a class="follow" href="https://www.instagram.com/buildwith.rex/" rel="noopener">Follow @buildwith.rex</a>
+  <nav><a href="/">Home</a><a href="/kits/">Kits</a><a href="/topics/">Topics</a><a href="/about/">About</a><a href="/privacy/">Privacy</a></nav>
+</footer>
+<script src="/copy.js?v=4"></script>
+</body>
+</html>
