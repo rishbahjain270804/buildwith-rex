@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://buildwithrex.me/sitemap.xml
+Sitemap: https://rishbahjain270804.github.io/buildwith-rex/sitemap.xml
